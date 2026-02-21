@@ -1,32 +1,22 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 
-export default function MessageBubble({ text, sender }) {
-  const isMe = sender === 'me';
-
+export default function MessageBubble({ text }) {
   return (
-    <View style={[
-      styles.bubble,
-      isMe ? styles.myMessage : styles.otherMessage
-    ]}>
-      <Text>{text}</Text>
+    <View style={styles.bubble}>
+      <Text style={styles.text}>{text}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   bubble: {
+    backgroundColor: "#e5e5ea",
     padding: 10,
-    borderRadius: 10,
-    marginVertical: 5,
-    maxWidth: '70%',
+    borderRadius: 8,
+    marginVertical: 4,
   },
-  myMessage: {
-    backgroundColor: '#4e8cff',
-    alignSelf: 'flex-end',
+  text: {
+    fontSize: 16,
   },
-  otherMessage: {
-    backgroundColor: '#ccc',
-    alignSelf: 'flex-start',
-  }
-}); 
+});

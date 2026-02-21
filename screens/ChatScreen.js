@@ -1,84 +1,73 @@
-import React, { useState, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
-  FlatList,
   TextInput,
-  TouchableOpacity,
-  Text,
+  Button,
+  FlatList,
   StyleSheet,
-} from 'react-native';
-import MessageBubble from '../components/MessageBubble';
+} from "react-native";
 
-export default function ChatScreen({ route, navigation }) {
-  const { userName, chatId } = route.params;
+import { db } from "../services/firebaseConfig";
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+} from "firebase/firestore";
 
-  const [message, setMessage] = useState('');
+import MessageBubble from "../components/MessageBubble";
+
+export default function ChatScreen() {
   const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState("");
 
-  const flatListRef = useRef(null);
+  useEffect(() => {
+    const q = query(
+      collection(db, "messages"),
+      orderBy("createdAt")
+    );
 
-  // Set dynamic header title
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: userName || 'Chat',
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMessages(msgs);
     });
-  }, [navigation]);
 
-  const sendMessage = () => {
+    return unsubscribe;
+  }, []);
+
+  const sendMessage = async () => {
     if (!message.trim()) return;
 
-    const newMessage = {
-      id: Date.now().toString(),
+    await addDoc(collection(db, "messages"), {
       text: message,
-      sender: 'me',
-      time: new Date().toLocaleTimeString(),
-    };
+      createdAt: new Date(),
+    });
 
-    setMessages((prev) => [...prev, newMessage]);
-    setMessage('');
-
-    // Fake auto reply
-    setTimeout(() => {
-      const reply = {
-        id: Date.now().toString(),
-        text: 'Auto reply 🤖',
-        sender: 'other',
-        time: new Date().toLocaleTimeString(),
-      };
-
-      setMessages((prev) => [...prev, reply]);
-    }, 1000);
+    setMessage("");
   };
 
   return (
     <View style={styles.container}>
       <FlatList
-        ref={flatListRef}
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <MessageBubble
-            text={item.text}
-            sender={item.sender}
-            time={item.time}
-          />
+          <MessageBubble text={item.text} />
         )}
-        onContentSizeChange={() =>
-          flatListRef.current?.scrollToEnd({ animated: true })
-        }
       />
 
       <View style={styles.inputContainer}>
         <TextInput
-          style={styles.input}
           value={message}
           onChangeText={setMessage}
           placeholder="Type message..."
+          style={styles.input}
         />
-
-        <TouchableOpacity style={styles.button} onPress={sendMessage}>
-          <Text style={styles.buttonText}>Send</Text>
-        </TouchableOpacity>
+        <Button title="Send" onPress={sendMessage} />
       </View>
     </View>
   );
@@ -87,28 +76,17 @@ export default function ChatScreen({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    backgroundColor: '#f2f2f2',
+    padding: 15,
   },
   inputContainer: {
-    flexDirection: 'row',
-    paddingVertical: 5,
+    flexDirection: "row",
+    marginTop: 10,
   },
   input: {
     flex: 1,
-    backgroundColor: 'white',
+    borderWidth: 1,
     padding: 10,
-    borderRadius: 8,
-  },
-  button: {
-    marginLeft: 5,
-    backgroundColor: '#4e8cff',
-    padding: 12,
-    borderRadius: 8,
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    marginRight: 10,
+    borderRadius: 6,
   },
 });
