@@ -275,7 +275,7 @@ export default function ChatListScreen({ navigation }) {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.heroCard}>
-          <Text style={styles.title}>Start a  new chat</Text>
+          <Text style={styles.title}>Start a new chat</Text>
           <Text style={styles.subtitle}>Invite one or many people with comma-separated names.</Text>
         </View>
 
@@ -311,6 +311,19 @@ export default function ChatListScreen({ navigation }) {
               style={styles.input}
             />
 
+            <TouchableOpacity
+              style={[styles.button, disabled && styles.buttonDisabled]}
+              onPress={openChat}
+              disabled={disabled}
+            >
+              <Text style={styles.buttonText}>Open Chat</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.settingsCard}>
+            <Text style={styles.settingsTitle}>Connection settings</Text>
+            <Text style={styles.settingsSubtitle}>Choose mode and test device connectivity.</Text>
+
             <Text style={styles.label}>Connection mode</Text>
             <View style={styles.modeRow}>
               {CONNECTION_OPTIONS.map((option) => (
@@ -335,21 +348,6 @@ export default function ChatListScreen({ navigation }) {
             </View>
 
             <TouchableOpacity
-              style={[styles.button, disabled && styles.buttonDisabled]}
-              onPress={openChat}
-              disabled={disabled}
-            >
-              <Text style={styles.buttonText}>Open Chat</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.connectCard}>
-            <Text style={styles.connectTitle}>Connect with unique code</Text>
-            <Text style={styles.connectSubtitle}>
-              One person creates a code, the other person enters it.
-            </Text>
-
-            <TouchableOpacity
               style={[styles.testButton, isTestingConnection && styles.testButtonDisabled]}
               onPress={runConnectionTest}
               disabled={isTestingConnection}
@@ -358,6 +356,13 @@ export default function ChatListScreen({ navigation }) {
                 {isTestingConnection ? "Testing..." : "Run Connection Test"}
               </Text>
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.connectCard}>
+            <Text style={styles.connectTitle}>Connect with unique code</Text>
+            <Text style={styles.connectSubtitle}>
+              One person creates a code, the other person enters it.
+            </Text>
 
             <TouchableOpacity style={styles.secondaryButton} onPress={handleGenerateConnectCode}>
               <Text style={styles.secondaryButtonText}>Generate My Code</Text>
@@ -379,11 +384,11 @@ export default function ChatListScreen({ navigation }) {
               autoCorrect={false}
               style={styles.input}
               maxLength={8}
+              returnKeyType="done"
+              onSubmitEditing={connectWithCode}
             />
 
-            <TouchableOpacity style={styles.button} onPress={connectWithCode}>
-              <Text style={styles.buttonText}>Connect Now</Text>
-            </TouchableOpacity>
+            <Text style={styles.connectHint}>Press enter/done to connect with code.</Text>
           </View>
 
           {!!normalizeUserId(myName) && (
