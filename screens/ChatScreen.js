@@ -4,13 +4,13 @@ import {
   Text,
   TextInput,
   FlatList,
-  StyleSheet,
   Alert,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
 } from "react-native";
+import * as Network from "expo-network";
 
 import { db } from "../services/firebaseConfig";
 import {
@@ -25,16 +25,55 @@ import {
 } from "firebase/firestore";
 
 import MessageBubble from "../components/MessageBubble";
+import { humanizeConnectionType } from "../utils/chatUtils";
+import styles from "../styles/chatScreenStyles";
 
 export default function ChatScreen({ route }) {
   const currentUserId = route?.params?.currentUserId || "demo-user";
   const currentUserName = route?.params?.currentUserName || "You";
-  const otherUserId = route?.params?.otherUserId || "friend";
-  const otherUserName = route?.params?.otherUserName || "Friend";
-  const chatId = route?.params?.chatId || "demo-user__friend";
+  const chatId = route?.params?.chatId || "internet__demo-user__friend";
+  const participants = route?.params?.participants || [currentUserId, "friend"];
+  const participantNames = route?.params?.participantNames || {
+    [currentUserId]: currentUserName,
+    friend: "Friend",
+  };
+  const chatTitle = route?.params?.chatTitle || "Group Chat";
+  const connectionType = route?.params?.connectionType || "internet";
 
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+
+  const refreshAndValidateNetwork = async () => {
+    const state = await Network.getNetworkStateAsync();
+
+    if (connectionType === "bluetooth") {
+      Alert.alert(
+        "Bluetooth mode",
+        "Bluetooth transport is not available in Expo Go for this app. Use a development build with a BLE transport service to enable cross-device Bluetooth chat."
+      );
+      return false;
+    }
+
+    if (connectionType === "wifi" && state.type !== Network.NetworkStateType.WIFI) {
+      Alert.alert("Wi-Fi required", "Switch to Wi-Fi to send messages in Wi-Fi mode.");
+      return false;
+    }
+
+    const online =
+      state.isConnected &&
+      state.type !== Network.NetworkStateType.NONE &&
+      state.type !== Network.NetworkStateType.UNKNOWN;
+
+    if (!online) {
+      Alert.alert(
+        "No network",
+        "You appear offline. Connect to Wi-Fi or mobile internet and retry."
+      );
+      return false;
+    }
+
+    return true;
+  };
 
   useEffect(() => {
     const q = query(
@@ -67,6 +106,12 @@ export default function ChatScreen({ route }) {
     if (!message.trim()) return;
 
     try {
+      const canSend = await refreshAndValidateNetwork();
+
+      if (!canSend) {
+        return;
+      }
+
       const textToSend = message.trim();
 
       await addDoc(collection(db, "chats", chatId, "messages"), {
@@ -79,11 +124,10 @@ export default function ChatScreen({ route }) {
       await setDoc(
         doc(db, "chats", chatId),
         {
-          participants: [currentUserId, otherUserId],
-          participantNames: {
-            [currentUserId]: currentUserName,
-            [otherUserId]: otherUserName,
-          },
+          participants,
+          participantNames,
+          title: chatTitle,
+          connectionType,
           lastMessageText: textToSend,
           lastMessageSenderId: currentUserId,
           updatedAt: serverTimestamp(),
@@ -111,12 +155,17 @@ export default function ChatScreen({ route }) {
         <View style={styles.header}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
-              {otherUserName.charAt(0).toUpperCase()}
+              {chatTitle.charAt(0).toUpperCase()}
             </Text>
           </View>
-          <View>
-            <Text style={styles.chatTitle}>{otherUserName}</Text>
-            <Text style={styles.chatSubtitle}>You: {currentUserName}</Text>
+          <View style={styles.headerTextWrap}>
+            <Text style={styles.chatTitle} numberOfLines={1}>{chatTitle}</Text>
+            <Text style={styles.chatSubtitle} numberOfLines={1}>
+              {participants.length} participants · You: {currentUserName}
+            </Text>
+          </View>
+          <View style={styles.modePill}>
+            <Text style={styles.modePillText}>{humanizeConnectionType(connectionType)}</Text>
           </View>
         </View>
 
@@ -134,6 +183,8 @@ export default function ChatScreen({ route }) {
             <MessageBubble
               text={item.text}
               createdAt={item.createdAt}
+              senderName={item.senderName}
+              showSender={participants.length > 2}
               isOwn={item.senderId === currentUserId}
             />
           )}
@@ -144,6 +195,7 @@ export default function ChatScreen({ route }) {
             value={message}
             onChangeText={setMessage}
             placeholder="Type a message"
+            placeholderTextColor="#8494ab"
             style={styles.input}
             multiline
             maxLength={500}
@@ -163,96 +215,3 @@ export default function ChatScreen({ route }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f5f7fb",
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    paddingBottom: 8,
-    backgroundColor: "#f5f7fb",
-  },
-  listContent: {
-    paddingBottom: 10,
-    paddingTop: 4,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#e3e7ef",
-    padding: 10,
-    marginBottom: 10,
-  },
-  avatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "#2d6cdf",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 10,
-  },
-  avatarText: {
-    color: "#ffffff",
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  chatTitle: {
-    fontSize: 16,
-    color: "#1f2430",
-    fontWeight: "600",
-  },
-  chatSubtitle: {
-    marginTop: 2,
-    fontSize: 12,
-    color: "#6a7180",
-  },
-  emptyListContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: {
-    color: "#7a7f8a",
-    fontSize: 14,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    marginTop: 8,
-    backgroundColor: "#ffffff",
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#e3e7ef",
-    padding: 8,
-  },
-  input: {
-    flex: 1,
-    minHeight: 40,
-    maxHeight: 120,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    color: "#20242c",
-  },
-  sendButton: {
-    backgroundColor: "#2d6cdf",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    marginLeft: 8,
-  },
-  sendButtonDisabled: {
-    backgroundColor: "#9db7ea",
-  },
-  sendText: {
-    color: "#ffffff",
-    fontWeight: "600",
-  },
-});
