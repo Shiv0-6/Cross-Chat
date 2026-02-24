@@ -1,3 +1,9 @@
+import {
+  CONNECTION_TYPES,
+  CONNECTION_LABELS,
+  CONNECTION_ACCENTS,
+} from "../constants/appConstants";
+
 export function normalizeUserId(value) {
   return value.trim().toLowerCase();
 }
@@ -18,13 +24,9 @@ export function buildChatId(participants, connectionType) {
 }
 
 export function humanizeConnectionType(connectionType) {
-  if (connectionType === "wifi") return "Wi-Fi";
-  if (connectionType === "bluetooth") return "Bluetooth";
-  return "Internet";
+  return CONNECTION_LABELS[connectionType] || CONNECTION_LABELS[CONNECTION_TYPES.INTERNET];
 }
 
 export function getConnectionAccent(connectionType) {
-  if (connectionType === "wifi") return "#0f8f6f";
-  if (connectionType === "bluetooth") return "#6a52d9";
-  return "#2d6cdf";
+  return CONNECTION_ACCENTS[connectionType] || CONNECTION_ACCENTS[CONNECTION_TYPES.INTERNET];
 }

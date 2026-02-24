@@ -1,7 +1,6 @@
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebaseConfig";
-
-const CONNECT_CODES_COLLECTION = "chatConnectCodes";
+import { FIRESTORE_COLLECTIONS } from "../constants/appConstants";
 
 export function normalizeConnectCode(value) {
   return value
@@ -33,7 +32,7 @@ export async function generateConnectCode({
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const candidateCode = createRandomCode(6);
-    const candidateRef = doc(db, CONNECT_CODES_COLLECTION, candidateCode);
+    const candidateRef = doc(db, FIRESTORE_COLLECTIONS.CONNECT_CODES, candidateCode);
     const candidateSnapshot = await getDoc(candidateRef);
 
     if (!candidateSnapshot.exists()) {
@@ -53,7 +52,7 @@ export async function generateConnectCode({
 }
 
 export async function getConnectCodeDetails(connectCode) {
-  const codeRef = doc(db, CONNECT_CODES_COLLECTION, connectCode);
+  const codeRef = doc(db, FIRESTORE_COLLECTIONS.CONNECT_CODES, connectCode);
   const codeSnapshot = await getDoc(codeRef);
 
   if (!codeSnapshot.exists()) {

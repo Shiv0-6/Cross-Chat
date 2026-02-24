@@ -26,13 +26,18 @@ import {
   getConnectCodeDetails,
 } from "../services/connectCodeService";
 import { runConnectionDiagnostics } from "../services/connectionDiagnosticsService";
+import {
+  CONNECTION_OPTIONS,
+  DEFAULT_CONNECTION_TYPE,
+  FIRESTORE_COLLECTIONS,
+} from "../constants/appConstants";
 import styles from "../styles/chatListStyles";
 
 export default function ChatListScreen({ navigation }) {
   const [myName, setMyName] = useState("");
   const [participantsInput, setParticipantsInput] = useState("");
   const [chatTitle, setChatTitle] = useState("");
-  const [connectionType, setConnectionType] = useState("internet");
+  const [connectionType, setConnectionType] = useState(DEFAULT_CONNECTION_TYPE);
   const [connectCodeInput, setConnectCodeInput] = useState("");
   const [myConnectCode, setMyConnectCode] = useState("");
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -47,7 +52,7 @@ export default function ChatListScreen({ navigation }) {
     }
 
     const chatsQuery = query(
-      collection(db, "chats"),
+      collection(db, FIRESTORE_COLLECTIONS.CHATS),
       where("participants", "array-contains", currentUserId)
     );
 
@@ -74,7 +79,7 @@ export default function ChatListScreen({ navigation }) {
               participantCount: allParticipants.length,
               participants: allParticipants,
               participantNames,
-              connectionType: data?.connectionType || "internet",
+              connectionType: data?.connectionType || DEFAULT_CONNECTION_TYPE,
               updatedAt: data?.updatedAt,
               lastMessageText: data?.lastMessageText || "",
             };
@@ -270,7 +275,7 @@ export default function ChatListScreen({ navigation }) {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <View style={styles.heroCard}>
-          <Text style={styles.title}>Start a group chat</Text>
+          <Text style={styles.title}>Start a  new chat</Text>
           <Text style={styles.subtitle}>Invite one or many people with comma-separated names.</Text>
         </View>
 
@@ -308,11 +313,7 @@ export default function ChatListScreen({ navigation }) {
 
             <Text style={styles.label}>Connection mode</Text>
             <View style={styles.modeRow}>
-              {[
-                { id: "internet", label: "Internet" },
-                { id: "wifi", label: "Wi-Fi" },
-                { id: "bluetooth", label: "Bluetooth" },
-              ].map((option) => (
+              {CONNECTION_OPTIONS.map((option) => (
                 <TouchableOpacity
                   key={option.id}
                   onPress={() => setConnectionType(option.id)}

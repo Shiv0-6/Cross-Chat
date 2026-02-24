@@ -26,19 +26,24 @@ import {
 
 import MessageBubble from "../components/MessageBubble";
 import { humanizeConnectionType } from "../utils/chatUtils";
+import {
+  DEFAULT_CONNECTION_TYPE,
+  FIRESTORE_COLLECTIONS,
+} from "../constants/appConstants";
 import styles from "../styles/chatScreenStyles";
 
 export default function ChatScreen({ route }) {
   const currentUserId = route?.params?.currentUserId || "demo-user";
   const currentUserName = route?.params?.currentUserName || "You";
-  const chatId = route?.params?.chatId || "internet__demo-user__friend";
+  const chatId =
+    route?.params?.chatId || `${DEFAULT_CONNECTION_TYPE}__demo-user__friend`;
   const participants = route?.params?.participants || [currentUserId, "friend"];
   const participantNames = route?.params?.participantNames || {
     [currentUserId]: currentUserName,
     friend: "Friend",
   };
   const chatTitle = route?.params?.chatTitle || "Group Chat";
-  const connectionType = route?.params?.connectionType || "internet";
+  const connectionType = route?.params?.connectionType || DEFAULT_CONNECTION_TYPE;
 
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
@@ -77,7 +82,7 @@ export default function ChatScreen({ route }) {
 
   useEffect(() => {
     const q = query(
-      collection(db, "chats", chatId, "messages"),
+      collection(db, FIRESTORE_COLLECTIONS.CHATS, chatId, "messages"),
       orderBy("createdAt")
     );
 
@@ -114,7 +119,7 @@ export default function ChatScreen({ route }) {
 
       const textToSend = message.trim();
 
-      await addDoc(collection(db, "chats", chatId, "messages"), {
+      await addDoc(collection(db, FIRESTORE_COLLECTIONS.CHATS, chatId, "messages"), {
         text: textToSend,
         senderId: currentUserId,
         senderName: currentUserName,
@@ -122,7 +127,7 @@ export default function ChatScreen({ route }) {
       });
 
       await setDoc(
-        doc(db, "chats", chatId),
+        doc(db, FIRESTORE_COLLECTIONS.CHATS, chatId),
         {
           participants,
           participantNames,

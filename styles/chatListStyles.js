@@ -28,6 +28,7 @@ const chatListStyles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
+    textAlign: "center",
     fontSize: 24,
     fontWeight: "700",
     color: "#1f2430",

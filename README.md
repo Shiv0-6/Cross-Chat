@@ -16,6 +16,7 @@
 - `components/` → reusable UI parts (`MessageBubble`)
 - `styles/` → separated styles (`chatListStyles`, `chatScreenStyles`, `messageBubbleStyles`)
 - `utils/` → pure helpers (`chatUtils`)
+- `constants/` → central app constants (`appConstants`)
 - `services/` → Firebase + feature services (`firebaseConfig`, `connectCodeService`, `connectionDiagnosticsService`)
 
 ## Connect with Code (1-to-1)
