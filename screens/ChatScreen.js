@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
   Platform,
   SafeAreaView,
 } from "react-native";
-import * as Network from "expo-network";
+import NetInfo from "@react-native-community/netinfo";
 
 import { db } from "../services/firebaseConfig";
 import {
@@ -22,6 +22,7 @@ import {
   serverTimestamp,
   doc,
   setDoc,
+  increment,
 } from "firebase/firestore";
 
 import MessageBubble from "../components/MessageBubble";
@@ -32,7 +33,7 @@ import {
 } from "../constants/appConstants";
 import styles from "../styles/chatScreenStyles";
 
-export default function ChatScreen({ route }) {
+export default function ChatScreen({ route, navigation }) {
   const currentUserId = route?.params?.currentUserId || "demo-user";
   const currentUserName = route?.params?.currentUserName || "You";
   const chatId =
@@ -46,28 +47,49 @@ export default function ChatScreen({ route }) {
   const connectionType = route?.params?.connectionType || DEFAULT_CONNECTION_TYPE;
 
   const [messages, setMessages] = useState([]);
+  const [chatMeta, setChatMeta] = useState(null);
   const [message, setMessage] = useState("");
+  const listRef = useRef(null);
+  const isNearBottomRef = useRef(true);
+  const isFirstLoadRef = useRef(true);
+
+  const chatDocRef = useMemo(
+    () => doc(db, FIRESTORE_COLLECTIONS.CHATS, chatId),
+    [chatId]
+  );
+
+  const markChatAsSeen = useCallback(async () => {
+    try {
+      await setDoc(
+        chatDocRef,
+        {
+          [`lastSeenBy.${currentUserId}`]: serverTimestamp(),
+          [`unreadBy.${currentUserId}`]: 0,
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error("Mark seen error:", error);
+    }
+  }, [chatDocRef, currentUserId]);
 
   const refreshAndValidateNetwork = async () => {
-    const state = await Network.getNetworkStateAsync();
+    const state = await NetInfo.fetch();
 
     if (connectionType === "bluetooth") {
       Alert.alert(
         "Bluetooth mode",
-        "Bluetooth transport is not available in Expo Go for this app. Use a development build with a BLE transport service to enable cross-device Bluetooth chat."
+        "Bluetooth transport is not implemented yet in this app. Add a BLE transport service (for example react-native-ble-plx) to enable cross-device Bluetooth chat."
       );
       return false;
     }
 
-    if (connectionType === "wifi" && state.type !== Network.NetworkStateType.WIFI) {
+    if (connectionType === "wifi" && state.type !== "wifi") {
       Alert.alert("Wi-Fi required", "Switch to Wi-Fi to send messages in Wi-Fi mode.");
       return false;
     }
 
-    const online =
-      state.isConnected &&
-      state.type !== Network.NetworkStateType.NONE &&
-      state.type !== Network.NetworkStateType.UNKNOWN;
+    const online = Boolean(state.isConnected) && state.isInternetReachable !== false;
 
     if (!online) {
       Alert.alert(
@@ -79,6 +101,20 @@ export default function ChatScreen({ route }) {
 
     return true;
   };
+
+  useEffect(() => {
+    const unsubscribeMeta = onSnapshot(
+      chatDocRef,
+      (snapshot) => {
+        setChatMeta(snapshot.data() || null);
+      },
+      (error) => {
+        console.error("Chat meta listener error:", error);
+      }
+    );
+
+    return unsubscribeMeta;
+  }, [chatDocRef]);
 
   useEffect(() => {
     const q = query(
@@ -94,6 +130,7 @@ export default function ChatScreen({ route }) {
           ...doc.data(),
         }));
         setMessages(msgs);
+        markChatAsSeen();
       },
       (error) => {
         Alert.alert(
@@ -105,7 +142,129 @@ export default function ChatScreen({ route }) {
     );
 
     return unsubscribe;
-  }, [chatId]);
+  }, [chatId, markChatAsSeen]);
+
+  const getTimestampMillis = (value) => {
+    if (!value) return 0;
+    if (typeof value?.toDate === "function") {
+      return value.toDate().getTime();
+    }
+    const date = value instanceof Date ? value : new Date(value);
+    const millis = date.getTime();
+    return Number.isNaN(millis) ? 0 : millis;
+  };
+
+  const toDateKey = (value) => {
+    const millis = getTimestampMillis(value);
+    if (!millis) return "unknown";
+    const date = new Date(millis);
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const day = `${date.getDate()}`.padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatDateLabel = (value) => {
+    const millis = getTimestampMillis(value);
+    if (!millis) return "Today";
+    const date = new Date(millis);
+    const now = new Date();
+
+    const isToday = date.toDateString() === now.toDateString();
+    if (isToday) return "Today";
+
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+
+    return date.toLocaleDateString([], {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const readByAllOthers = (messageCreatedAt) => {
+    const messageTime = getTimestampMillis(messageCreatedAt);
+    if (!messageTime || !chatMeta?.lastSeenBy) return false;
+
+    const others = participants.filter((participantId) => participantId !== currentUserId);
+    if (others.length === 0) return false;
+
+    return others.every((participantId) => {
+      const seenAt = chatMeta.lastSeenBy?.[participantId];
+      return getTimestampMillis(seenAt) >= messageTime;
+    });
+  };
+
+  const messageRows = useMemo(() => {
+    const rows = [];
+    let lastDateKey = "";
+
+    messages.forEach((item) => {
+      const dateKey = toDateKey(item.createdAt);
+
+      if (dateKey !== lastDateKey) {
+        rows.push({
+          id: `date-${dateKey}`,
+          type: "date",
+          label: formatDateLabel(item.createdAt),
+        });
+        lastDateKey = dateKey;
+      }
+
+      const isOwn = item.senderId === currentUserId;
+      let tickStatus = "";
+
+      if (isOwn) {
+        tickStatus = item.createdAt
+          ? readByAllOthers(item.createdAt)
+            ? "read"
+            : "delivered"
+          : "sent";
+      }
+
+      rows.push({
+        ...item,
+        type: "message",
+        tickStatus,
+      });
+    });
+
+    return rows;
+  }, [messages, currentUserId, chatMeta, participants]);
+
+  const scrollToLatest = useCallback((animated = true) => {
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToEnd?.({ animated });
+    });
+  }, []);
+
+  const handleListScroll = useCallback((event) => {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const distanceFromBottom =
+      contentSize.height - (contentOffset.y + layoutMeasurement.height);
+    isNearBottomRef.current = distanceFromBottom < 80;
+  }, []);
+
+  const lastMessageIsOwn = useMemo(() => {
+    const lastMessage = messages[messages.length - 1];
+    return lastMessage?.senderId === currentUserId;
+  }, [messages, currentUserId]);
+
+  useEffect(() => {
+    if (messageRows.length === 0) return;
+
+    if (isFirstLoadRef.current) {
+      scrollToLatest(false);
+      isFirstLoadRef.current = false;
+      return;
+    }
+
+    if (isNearBottomRef.current || lastMessageIsOwn) {
+      scrollToLatest(true);
+    }
+  }, [messages.length, messageRows.length, lastMessageIsOwn, scrollToLatest]);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -126,8 +285,19 @@ export default function ChatScreen({ route }) {
         createdAt: serverTimestamp(),
       });
 
+      const unreadUpdates = {
+        [`unreadBy.${currentUserId}`]: 0,
+        [`lastSeenBy.${currentUserId}`]: serverTimestamp(),
+      };
+
+      participants
+        .filter((participantId) => participantId !== currentUserId)
+        .forEach((participantId) => {
+          unreadUpdates[`unreadBy.${participantId}`] = increment(1);
+        });
+
       await setDoc(
-        doc(db, FIRESTORE_COLLECTIONS.CHATS, chatId),
+        chatDocRef,
         {
           participants,
           participantNames,
@@ -135,7 +305,9 @@ export default function ChatScreen({ route }) {
           connectionType,
           lastMessageText: textToSend,
           lastMessageSenderId: currentUserId,
+          lastMessageCreatedAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
+          ...unreadUpdates,
         },
         { merge: true }
       );
@@ -155,13 +327,14 @@ export default function ChatScreen({ route }) {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+        keyboardVerticalOffset={0}
       >
         <View style={styles.header}>
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Text style={styles.backButtonText}>‹</Text>
+          </TouchableOpacity>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {chatTitle.charAt(0).toUpperCase()}
-            </Text>
+            <Text style={styles.avatarText}>{chatTitle.charAt(0).toUpperCase()}</Text>
           </View>
           <View style={styles.headerTextWrap}>
             <Text style={styles.chatTitle} numberOfLines={1}>{chatTitle}</Text>
@@ -175,36 +348,57 @@ export default function ChatScreen({ route }) {
         </View>
 
         <FlatList
-          data={messages}
+          ref={listRef}
+          data={messageRows}
           keyExtractor={(item) => item.id}
           contentContainerStyle={[
             styles.listContent,
-            messages.length === 0 && styles.emptyListContent,
+            messageRows.length === 0 && styles.emptyListContent,
           ]}
+          onContentSizeChange={() => {
+            if (isNearBottomRef.current) {
+              scrollToLatest(false);
+            }
+          }}
+          onScroll={handleListScroll}
+          scrollEventThrottle={16}
           ListEmptyComponent={
             <Text style={styles.emptyText}>No messages yet. Start the chat.</Text>
           }
-          renderItem={({ item }) => (
-            <MessageBubble
-              text={item.text}
-              createdAt={item.createdAt}
-              senderName={item.senderName}
-              showSender={participants.length > 2}
-              isOwn={item.senderId === currentUserId}
-            />
-          )}
+          renderItem={({ item }) => {
+            if (item.type === "date") {
+              return (
+                <View style={styles.dateSeparatorWrap}>
+                  <Text style={styles.dateSeparatorText}>{item.label}</Text>
+                </View>
+              );
+            }
+
+            return (
+              <MessageBubble
+                text={item.text}
+                createdAt={item.createdAt}
+                senderName={item.senderName}
+                showSender={participants.length > 2}
+                isOwn={item.senderId === currentUserId}
+                tickStatus={item.tickStatus}
+              />
+            );
+          }}
         />
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            value={message}
-            onChangeText={setMessage}
-            placeholder="Type a message"
-            placeholderTextColor="#8494ab"
-            style={styles.input}
-            multiline
-            maxLength={500}
-          />
+        <View style={styles.inputBarWrap}>
+          <View style={styles.inputContainer}>
+            <TextInput
+              value={message}
+              onChangeText={setMessage}
+              placeholder="Type a message"
+              placeholderTextColor="#9E9E9E"
+              style={styles.input}
+              multiline
+              maxLength={500}
+            />
+          </View>
           <TouchableOpacity
             style={[
               styles.sendButton,
@@ -213,7 +407,7 @@ export default function ChatScreen({ route }) {
             onPress={sendMessage}
             disabled={!message.trim()}
           >
-            <Text style={styles.sendText}>Send</Text>
+            <Text style={styles.sendText}>▶</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

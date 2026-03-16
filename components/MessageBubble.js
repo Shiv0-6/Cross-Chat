@@ -27,8 +27,16 @@ export default function MessageBubble({
   senderName,
   showSender = false,
   isOwn = false,
+  tickStatus = "",
 }) {
   const timeText = formatTime(createdAt);
+
+  const tickText =
+    tickStatus === "read" || tickStatus === "delivered"
+      ? "✓✓"
+      : tickStatus === "sent"
+      ? "✓"
+      : "";
 
   return (
     <View style={[styles.wrapper, isOwn ? styles.wrapperOwn : styles.wrapperOther]}>
@@ -37,9 +45,21 @@ export default function MessageBubble({
           <Text style={styles.senderName}>{senderName}</Text>
         )}
         <Text style={[styles.text, isOwn && styles.textOwn]}>{text}</Text>
-        {!!timeText && (
-          <Text style={[styles.time, isOwn && styles.timeOwn]}>{timeText}</Text>
-        )}
+        <View style={styles.metaRow}>
+          {!!timeText && (
+            <Text style={[styles.time, isOwn && styles.timeOwn]}>{timeText}</Text>
+          )}
+          {!!tickText && isOwn && (
+            <Text
+              style={[
+                styles.tick,
+                tickStatus === "read" ? styles.tickRead : styles.tickDelivered,
+              ]}
+            >
+              {tickText}
+            </Text>
+          )}
+        </View>
       </View>
     </View>
   );

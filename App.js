@@ -13,29 +13,22 @@ export default function App() {
       theme={{
         dark: false,
         colors: {
-          primary: "#2d6cdf",
-          background: "#eef3fb",
-          card: "#ffffff",
-          text: "#1f2430",
-          border: "#dce6f4",
-          notification: "#2d6cdf",
+          primary: "#25D366",
+          background: "#FFFFFF",
+          card: "#075E54",
+          text: "#FFFFFF",
+          border: "#E9EDEF",
+          notification: "#25D366",
         },
       }}
     >
       <Stack.Navigator
         screenOptions={{
-          headerStyle: {
-            backgroundColor: "#ffffff",
-          },
-          headerTitleStyle: {
-            color: "#1f2430",
-            fontWeight: "700",
-          },
+          headerStyle: { backgroundColor: "#075E54" },
+          headerTitleStyle: { color: "#FFFFFF", fontWeight: "700", fontSize: 20 },
           headerShadowVisible: false,
-          headerTintColor: "#1f2430",
-          contentStyle: {
-            backgroundColor: "#eef3fb",
-          },
+          headerTintColor: "#FFFFFF",
+          contentStyle: { backgroundColor: "#FFFFFF" },
         }}
       >
         <Stack.Screen
@@ -48,9 +41,7 @@ export default function App() {
         <Stack.Screen
           name="Chat"
           component={ChatScreen}
-          options={{
-            title: "Conversation",
-          }}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>

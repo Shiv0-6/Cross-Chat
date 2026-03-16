@@ -1,1 +1,23 @@
-node_modules
+node_modules/
+
+# macOS
+.DS_Store
+
+# React Native / Metro
+.metro-health-check*
+
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.keystore
+
+# iOS
+ios/Pods/
+ios/build/
+ios/DerivedData/
+
+# Logs
+npm-debug.log*
+yarn-error.log*

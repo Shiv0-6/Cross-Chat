@@ -1,0 +1,80 @@
+{
+  "buildFiles": [
+    "/home/mrfailure/CODING/Cross-Chat/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/home/mrfailure/CODING/Cross-Chat/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/home/mrfailure/CODING/Cross-Chat/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
+    "/home/mrfailure/CODING/Cross-Chat/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
+    "/home/mrfailure/CODING/Cross-Chat/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/home/mrfailure/Android/Sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/home/mrfailure/Android/Sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "appmodules::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "appmodules",
+      "output": "/home/mrfailure/CODING/Cross-Chat/android/app/build/intermediates/cxx/Debug/5e1p1t4z/obj/x86_64/libappmodules.so",
+      "runtimeFiles": [
+        "/home/mrfailure/CODING/Cross-Chat/android/app/build/intermediates/cxx/Debug/5e1p1t4z/obj/x86_64/libreact_codegen_safeareacontext.so",
+        "/home/mrfailure/CODING/Cross-Chat/android/app/build/intermediates/cxx/Debug/5e1p1t4z/obj/x86_64/libreact_codegen_rnscreens.so",
+        "/home/mrfailure/.gradle/caches/8.14.3/transforms/48f32c88ab848eeaa4d6425b771aa34b/transformed/fbjni-0.7.0/prefab/modules/fbjni/libs/android.x86_64/libfbjni.so",
+        "/home/mrfailure/.gradle/caches/8.14.3/transforms/16642ac4adfbde330822e02191f8f7e1/transformed/react-android-0.81.5-debug/prefab/modules/jsi/libs/android.x86_64/libjsi.so",
+        "/home/mrfailure/.gradle/caches/8.14.3/transforms/16642ac4adfbde330822e02191f8f7e1/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/libs/android.x86_64/libreactnative.so"
+      ]
+    },
+    "react_codegen_RNCNetInfoSpec::@c36c96bfd5b5770618a5": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_RNCNetInfoSpec"
+    },
+    "react_codegen_rngesturehandler_codegen::@39f233abcd2c728bc6ec": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_rngesturehandler_codegen"
+    },
+    "react_codegen_rnscreens::@25bcbd507e98d3a854ad": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_rnscreens",
+      "output": "/home/mrfailure/CODING/Cross-Chat/android/app/build/intermediates/cxx/Debug/5e1p1t4z/obj/x86_64/libreact_codegen_rnscreens.so",
+      "runtimeFiles": [
+        "/home/mrfailure/.gradle/caches/8.14.3/transforms/16642ac4adfbde330822e02191f8f7e1/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/libs/android.x86_64/libreactnative.so",
+        "/home/mrfailure/.gradle/caches/8.14.3/transforms/16642ac4adfbde330822e02191f8f7e1/transformed/react-android-0.81.5-debug/prefab/modules/jsi/libs/android.x86_64/libjsi.so",
+        "/home/mrfailure/.gradle/caches/8.14.3/transforms/48f32c88ab848eeaa4d6425b771aa34b/transformed/fbjni-0.7.0/prefab/modules/fbjni/libs/android.x86_64/libfbjni.so"
+      ]
+    },
+    "react_codegen_safeareacontext::@7984cd80db47aa7b952a": {
+      "toolchain": "toolchain",
+      "abi": "x86_64",
+      "artifactName": "react_codegen_safeareacontext",
+      "output": "/home/mrfailure/CODING/Cross-Chat/android/app/build/intermediates/cxx/Debug/5e1p1t4z/obj/x86_64/libreact_codegen_safeareacontext.so",
+      "runtimeFiles": [
+        "/home/mrfailure/.gradle/caches/8.14.3/transforms/48f32c88ab848eeaa4d6425b771aa34b/transformed/fbjni-0.7.0/prefab/modules/fbjni/libs/android.x86_64/libfbjni.so",
+        "/home/mrfailure/.gradle/caches/8.14.3/transforms/16642ac4adfbde330822e02191f8f7e1/transformed/react-android-0.81.5-debug/prefab/modules/jsi/libs/android.x86_64/libjsi.so",
+        "/home/mrfailure/.gradle/caches/8.14.3/transforms/16642ac4adfbde330822e02191f8f7e1/transformed/react-android-0.81.5-debug/prefab/modules/reactnative/libs/android.x86_64/libreactnative.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/home/mrfailure/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/home/mrfailure/Android/Sdk/ndk/27.1.12297006/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

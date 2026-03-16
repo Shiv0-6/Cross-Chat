@@ -2,8 +2,8 @@ import { StyleSheet } from "react-native";
 
 const messageBubbleStyles = StyleSheet.create({
   wrapper: {
-    marginVertical: 5,
-    paddingHorizontal: 2,
+    marginVertical: 2,
+    paddingHorizontal: 8,
   },
   wrapperOwn: {
     alignItems: "flex-end",
@@ -12,49 +12,63 @@ const messageBubbleStyles = StyleSheet.create({
     alignItems: "flex-start",
   },
   bubble: {
-    maxWidth: "82%",
-    paddingHorizontal: 13,
-    paddingVertical: 11,
-    borderRadius: 16,
-    borderWidth: 1,
-    shadowColor: "#0f2c5c",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
+    maxWidth: "80%",
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
     elevation: 1,
   },
+  /* Sent bubble: WhatsApp light-green, tail on top-right */
   bubbleOwn: {
-    backgroundColor: "#2d6cdf",
-    borderColor: "#2d6cdf",
-    borderTopRightRadius: 4,
+    backgroundColor: "#DCF8C6",
+    borderTopRightRadius: 2,
   },
+  /* Received bubble: white, tail on top-left */
   bubbleOther: {
-    backgroundColor: "#ffffff",
-    borderColor: "#e3e7ef",
-    borderTopLeftRadius: 4,
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 2,
   },
   text: {
     fontSize: 15,
-    color: "#1f2430",
+    color: "#111111",
     lineHeight: 20,
+  },
+  textOwn: {
+    color: "#111111",
   },
   senderName: {
     fontSize: 12,
-    color: "#5b6f8d",
-    fontWeight: "600",
-    marginBottom: 5,
+    color: "#128C7E",
+    fontWeight: "700",
+    marginBottom: 3,
   },
-  textOwn: {
-    color: "#ffffff",
+  metaRow: {
+    marginTop: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
   time: {
-    marginTop: 6,
     fontSize: 11,
-    color: "#7a7f8a",
-    alignSelf: "flex-end",
+    color: "#667781",
   },
   timeOwn: {
-    color: "#dbe7ff",
+    color: "#667781",
+  },
+  tick: {
+    marginLeft: 4,
+    fontSize: 11,
+    fontWeight: "700",
+  },
+  tickDelivered: {
+    color: "#667781",
+  },
+  tickRead: {
+    color: "#34B7F1",
   },
 });
 

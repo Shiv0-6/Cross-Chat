@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useLayoutEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   FlatList,
   ScrollView,
 } from "react-native";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { db } from "../services/firebaseConfig";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 
@@ -41,7 +42,60 @@ export default function ChatListScreen({ navigation }) {
   const [connectCodeInput, setConnectCodeInput] = useState("");
   const [myConnectCode, setMyConnectCode] = useState("");
   const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [showConnectionPanel, setShowConnectionPanel] = useState(false);
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false);
+  const [showAdvancedChat, setShowAdvancedChat] = useState(false);
+  const [showComposer, setShowComposer] = useState(false);
+  const [quickStatusText, setQuickStatusText] = useState("");
+  const [quickStatusType, setQuickStatusType] = useState("success");
   const [recentChats, setRecentChats] = useState([]);
+  const connectCodeInputRef = useRef(null);
+
+  const resetDraftFields = () => {
+    setParticipantsInput("");
+    setChatTitle("");
+    setConnectCodeInput("");
+    setMyConnectCode("");
+    setShowAdvancedChat(false);
+    setShowComposer(false);
+    setQuickStatusText("");
+    Alert.alert("Reset", "Draft chat fields were cleared.");
+  };
+
+  const openSettings = () => {
+    Alert.alert("Settings", "More settings features can be added here.");
+  };
+
+  const openMoreFeatures = () => {
+    Alert.alert("More features", "You can add more options in this 3-dots menu panel.");
+  };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            onPress={() => {
+              setShowConnectionPanel((prev) => !prev);
+              setShowSettingsPanel(false);
+            }}
+            style={styles.headerActionButton}
+          >
+            <Text style={styles.headerActionText}>📶</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setShowSettingsPanel((prev) => !prev);
+              setShowConnectionPanel(false);
+            }}
+            style={styles.headerActionButton}
+          >
+            <Text style={styles.headerActionText}>⋮</Text>
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation]);
 
   useEffect(() => {
     const currentUserId = normalizeUserId(myName);
@@ -81,6 +135,9 @@ export default function ChatListScreen({ navigation }) {
               participantNames,
               connectionType: data?.connectionType || DEFAULT_CONNECTION_TYPE,
               updatedAt: data?.updatedAt,
+              lastMessageCreatedAt: data?.lastMessageCreatedAt,
+              lastMessageSenderId: data?.lastMessageSenderId || "",
+              unreadBy: data?.unreadBy || {},
               lastMessageText: data?.lastMessageText || "",
             };
           })
@@ -186,11 +243,28 @@ export default function ChatListScreen({ navigation }) {
       }
 
       setMyConnectCode(generatedCode);
-      Alert.alert("Code ready", `Share this code: ${generatedCode}`);
+      setConnectCodeInput("");
+      requestAnimationFrame(() => {
+        connectCodeInputRef.current?.focus?.();
+      });
+      setQuickStatusType("success");
+      setQuickStatusText("Code generated. Share it and ask your friend to enter it.");
     } catch (error) {
       Alert.alert("Failed", "Could not generate code. Check your Firebase connection.");
       console.error("Generate connect code error:", error);
     }
+  };
+
+  const copyConnectCode = async () => {
+    if (!myConnectCode) {
+      setQuickStatusType("error");
+      setQuickStatusText("Generate a code first, then tap Copy.");
+      return;
+    }
+
+    Clipboard.setString(myConnectCode);
+    setQuickStatusType("success");
+    setQuickStatusText("Code copied. Share it with your friend.");
   };
 
   const connectWithCode = async () => {
@@ -242,9 +316,11 @@ export default function ChatListScreen({ navigation }) {
           [ownerUserId]: ownerUserName,
           [currentUserId]: currentUserName,
         },
-        chatTitle: `${ownerUserName} + ${currentUserName}`,
+        chatTitle: ownerUserName + " + " + currentUserName,
         connectionType: mode,
       });
+      setQuickStatusType("success");
+      setQuickStatusText("Connected successfully. Opening chat...");
     } catch (error) {
       Alert.alert("Connect failed", "Unable to verify code. Check your internet and retry.");
       console.error("Connect with code error:", error);
@@ -274,158 +350,117 @@ export default function ChatListScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <View style={styles.heroCard}>
-          <Text style={styles.title}>Start a new chat</Text>
-          <Text style={styles.subtitle}>Invite one or many people with comma-separated names.</Text>
-        </View>
-
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.formCard}>
-            <Text style={styles.label}>Your name</Text>
-            <TextInput
-              value={myName}
-              onChangeText={setMyName}
-              placeholder="e.g. rohan"
-              autoCapitalize="none"
-              style={styles.input}
-            />
+          {showSettingsPanel && (
+            <View style={styles.settingsPanel}>
+              <Text style={styles.settingsPanelTitle}>More options</Text>
+              <Text style={styles.settingsPanelSubtitle}>
+                Settings and extra features.
+              </Text>
+              <TouchableOpacity style={styles.settingsActionButton} onPress={openSettings}>
+                <Text style={styles.settingsActionText}>Settings</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.settingsActionButton} onPress={resetDraftFields}>
+                <Text style={styles.settingsActionText}>Clear draft fields</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.settingsActionButton} onPress={openMoreFeatures}>
+                <Text style={styles.settingsActionText}>More features</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-            <Text style={styles.label}>Participants</Text>
-            <TextInput
-              value={participantsInput}
-              onChangeText={setParticipantsInput}
-              placeholder="e.g. ayaan, sara, alex"
-              autoCapitalize="none"
-              style={styles.input}
-            />
-
-            <Text style={styles.label}>Chat title (optional)</Text>
-            <TextInput
-              value={chatTitle}
-              onChangeText={setChatTitle}
-              placeholder="e.g. Team Room"
-              style={styles.input}
-            />
-
-            <TouchableOpacity
-              style={[styles.button, disabled && styles.buttonDisabled]}
-              onPress={openChat}
-              disabled={disabled}
-            >
-              <Text style={styles.buttonText}>Open Chat</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.settingsCard}>
-            <Text style={styles.settingsTitle}>Connection settings</Text>
-            <Text style={styles.settingsSubtitle}>Choose mode and test device connectivity.</Text>
-
-            <Text style={styles.label}>Connection mode</Text>
-            <View style={styles.modeRow}>
-              {CONNECTION_OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.id}
-                  onPress={() => setConnectionType(option.id)}
-                  style={[
-                    styles.modeButton,
-                    connectionType === option.id && styles.modeButtonSelected,
-                  ]}
-                >
-                  <Text
+          {showConnectionPanel && (
+            <View style={styles.connectionPanel}>
+              <Text style={styles.label}>Connection mode</Text>
+              <View style={styles.modeRow}>
+                {CONNECTION_OPTIONS.map((option) => (
+                  <TouchableOpacity
+                    key={option.id}
+                    onPress={() => setConnectionType(option.id)}
                     style={[
-                      styles.modeButtonText,
-                      connectionType === option.id && styles.modeButtonTextSelected,
+                      styles.modeButton,
+                      connectionType === option.id && styles.modeButtonSelected,
                     ]}
                   >
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <TouchableOpacity
-              style={[styles.testButton, isTestingConnection && styles.testButtonDisabled]}
-              onPress={runConnectionTest}
-              disabled={isTestingConnection}
-            >
-              <Text style={styles.testButtonText}>
-                {isTestingConnection ? "Testing..." : "Run Connection Test"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.connectCard}>
-            <Text style={styles.connectTitle}>Connect with unique code</Text>
-            <Text style={styles.connectSubtitle}>
-              One person creates a code, the other person enters it.
-            </Text>
-
-            <TouchableOpacity style={styles.secondaryButton} onPress={handleGenerateConnectCode}>
-              <Text style={styles.secondaryButtonText}>Generate My Code</Text>
-            </TouchableOpacity>
-
-            {!!myConnectCode && (
-              <View style={styles.codeBox}>
-                <Text style={styles.codeLabel}>Your connect code</Text>
-                <Text style={styles.codeValue}>{myConnectCode}</Text>
-              </View>
-            )}
-
-            <Text style={styles.label}>Enter friend's code</Text>
-            <TextInput
-              value={connectCodeInput}
-              onChangeText={(value) => setConnectCodeInput(normalizeConnectCode(value))}
-              placeholder="e.g. A7K9Q2"
-              autoCapitalize="characters"
-              autoCorrect={false}
-              style={styles.input}
-              maxLength={8}
-              returnKeyType="done"
-              onSubmitEditing={connectWithCode}
-            />
-
-            <Text style={styles.connectHint}>Press enter/done to connect with code.</Text>
-          </View>
-
-          {!!normalizeUserId(myName) && (
-            <View style={styles.recentSection}>
-              <Text style={styles.recentTitle}>Recent chats</Text>
-              {recentChats.length === 0 ? (
-                <View style={styles.emptyCard}>
-                  <Text style={styles.emptyRecentText}>No recent chats yet.</Text>
-                  <Text style={styles.emptyRecentSubtext}>Create your first room above.</Text>
-                </View>
-              ) : (
-                <FlatList
-                  data={recentChats}
-                  keyExtractor={(item) => item.id}
-                  scrollEnabled={false}
-                  contentContainerStyle={styles.recentListContent}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={styles.recentItem}
-                      onPress={() => openRecentChat(item)}
+                    <Text
+                      style={[
+                        styles.modeButtonText,
+                        connectionType === option.id && styles.modeButtonTextSelected,
+                      ]}
                     >
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity
+                style={[styles.testButton, isTestingConnection && styles.testButtonDisabled]}
+                onPress={runConnectionTest}
+                disabled={isTestingConnection}
+              >
+                <Text style={styles.testButtonText}>
+                  {isTestingConnection ? "Testing..." : "Run Connection Test"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* RECENT CHATS — WhatsApp-style primary list */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionHeaderText}>RECENT CHATS</Text>
+          </View>
+          {recentChats.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyRecentText}>No chats yet</Text>
+              <Text style={styles.emptyRecentSubtext}>Tap + to start a quick or new chat.</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={recentChats}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              contentContainerStyle={styles.recentListContent}
+              renderItem={({ item }) => {
+                const timeSource = item.lastMessageCreatedAt || item.updatedAt;
+                const time = timeSource?.toDate?.()
+                  ? timeSource.toDate().toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "";
+                const unreadCount =
+                  item.lastMessageSenderId === normalizeUserId(myName)
+                    ? 0
+                    : Number(item.unreadBy?.[normalizeUserId(myName)] || 0);
+                return (
+                  <TouchableOpacity
+                    style={styles.recentItem}
+                    onPress={() => openRecentChat(item)}
+                  >
+                    <View style={styles.recentAvatar}>
+                      <Text style={styles.recentAvatarText}>
+                        {item.title.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={styles.recentTextWrap}>
                       <View style={styles.recentTopRow}>
-                        <View style={styles.recentAvatar}>
-                          <Text style={styles.recentAvatarText}>
-                            {item.title.charAt(0).toUpperCase()}
-                          </Text>
-                        </View>
-                        <View style={styles.recentTextWrap}>
-                          <Text style={styles.recentName} numberOfLines={1}>{item.title}</Text>
-                          <Text style={styles.recentMeta}>
-                            {item.participantCount} participants
-                          </Text>
-                        </View>
+                        <Text style={styles.recentName} numberOfLines={1}>
+                          {item.title}
+                        </Text>
+                        <Text style={styles.recentTime}>{time}</Text>
+                      </View>
+                      <View style={styles.recentBottomRow}>
+                        <Text style={styles.recentMessage} numberOfLines={1}>
+                          {item.lastMessageText || "Tap to open chat"}
+                        </Text>
                         <View
                           style={[
                             styles.connectionBadge,
-                            { backgroundColor: `${getConnectionAccent(item.connectionType)}22` },
+                            { backgroundColor: getConnectionAccent(item.connectionType) + "22" },
                           ]}
                         >
                           <Text
@@ -437,17 +472,135 @@ export default function ChatListScreen({ navigation }) {
                             {humanizeConnectionType(item.connectionType)}
                           </Text>
                         </View>
+                        {unreadCount > 0 && (
+                          <View style={styles.unreadBadge}>
+                            <Text style={styles.unreadBadgeText}>{unreadCount}</Text>
+                          </View>
+                        )}
                       </View>
-                      <Text style={styles.recentMessage} numberOfLines={1}>
-                        {item.lastMessageText || "Tap to continue chat"}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          )}
+
+          {showComposer && (
+            <>
+              {/* QUICK CONNECT */}
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionHeaderText}>QUICK CONNECT</Text>
+              </View>
+              <View style={styles.formSection}>
+                <Text style={styles.label}>Your name</Text>
+                <TextInput
+                  value={myName}
+                  onChangeText={setMyName}
+                  placeholder="e.g. rohan"
+                  placeholderTextColor="#9E9E9E"
+                  autoCapitalize="none"
+                  style={styles.input}
                 />
+
+                <View style={styles.quickActionRow}>
+                  <TouchableOpacity
+                    style={[styles.secondaryButton, styles.quickHalfButton]}
+                    onPress={handleGenerateConnectCode}
+                  >
+                    <Text style={styles.secondaryButtonText}>Generate My Code</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.quickJoinButton} onPress={connectWithCode}>
+                    <Text style={styles.quickJoinButtonText}>Join with Code</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {!!myConnectCode && (
+                  <View style={styles.codeBox}>
+                    <Text style={styles.codeLabel}>YOUR CONNECT CODE</Text>
+                    <View style={styles.codeRow}>
+                      <Text style={styles.codeValue}>{myConnectCode}</Text>
+                      <TouchableOpacity style={styles.copyCodeButton} onPress={copyConnectCode}>
+                        <Text style={styles.copyCodeText}>Copy</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                <Text style={styles.label}>Enter friend's code</Text>
+                <TextInput
+                  ref={connectCodeInputRef}
+                  value={connectCodeInput}
+                  onChangeText={(value) => setConnectCodeInput(normalizeConnectCode(value))}
+                  placeholder="e.g. A7K9Q2"
+                  placeholderTextColor="#9E9E9E"
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  style={styles.input}
+                  maxLength={8}
+                  returnKeyType="done"
+                  onSubmitEditing={connectWithCode}
+                />
+                <Text style={styles.connectHint}>Generate a code or enter one to connect instantly.</Text>
+                {!!quickStatusText && (
+                  <Text
+                    style={[
+                      styles.quickStatus,
+                      quickStatusType === "success" ? styles.quickStatusSuccess : styles.quickStatusError,
+                    ]}
+                  >
+                    {quickStatusText}
+                  </Text>
+                )}
+              </View>
+
+              {/* ADVANCED GROUP CHAT */}
+              <TouchableOpacity
+                style={styles.sectionHeader}
+                onPress={() => setShowAdvancedChat((prev) => !prev)}
+              >
+                <Text style={styles.sectionHeaderText}>
+                  {showAdvancedChat ? "ADVANCED GROUP CHAT ▴" : "ADVANCED GROUP CHAT ▾"}
+                </Text>
+              </TouchableOpacity>
+              {showAdvancedChat && (
+                <View style={styles.formSection}>
+                  <Text style={styles.label}>Participants</Text>
+                  <TextInput
+                    value={participantsInput}
+                    onChangeText={setParticipantsInput}
+                    placeholder="e.g. ayaan, sara, alex"
+                    placeholderTextColor="#9E9E9E"
+                    autoCapitalize="none"
+                    style={styles.input}
+                  />
+                  <Text style={styles.label}>Chat title (optional)</Text>
+                  <TextInput
+                    value={chatTitle}
+                    onChangeText={setChatTitle}
+                    placeholder="e.g. Team Room"
+                    placeholderTextColor="#9E9E9E"
+                    style={styles.input}
+                  />
+                  <TouchableOpacity
+                    style={[styles.button, disabled && styles.buttonDisabled]}
+                    onPress={openChat}
+                    disabled={disabled}
+                  >
+                    <Text style={styles.buttonText}>Open Group Chat</Text>
+                  </TouchableOpacity>
+                </View>
               )}
-            </View>
+            </>
           )}
         </ScrollView>
+
+        {/* FAB — green WhatsApp-style floating action button */}
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => setShowComposer((prev) => !prev)}
+        >
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
