@@ -1,3 +1,10 @@
+/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/ComponentDescriptors.cpp.o
+/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/EventEmitters.cpp.o
+/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/Props.cpp.o
+/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/ShadowNodes.cpp.o
+/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/States.cpp.o
+/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/react/renderer/components/rnclipboard/rnclipboardJSI-generated.cpp.o
+/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rnclipboard_autolinked_build/CMakeFiles/react_codegen_rnclipboard.dir/rnclipboard-generated.cpp.o
 /home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir/RNCNetInfoSpec-generated.cpp.o
 /home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir/react/renderer/components/RNCNetInfoSpec/ComponentDescriptors.cpp.o
 /home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir/react/renderer/components/RNCNetInfoSpec/EventEmitters.cpp.o

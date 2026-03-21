@@ -1,5 +1,6 @@
 {
   "buildFiles": [
+    "/home/mrfailure/CODING/Cross-Chat/node_modules/@react-native-clipboard/clipboard/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/mrfailure/CODING/Cross-Chat/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/mrfailure/CODING/Cross-Chat/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/mrfailure/CODING/Cross-Chat/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
@@ -21,6 +22,11 @@
     "{LIST_OF_TARGETS_TO_BUILD}"
   ],
   "libraries": {
+    "react_codegen_rnclipboard::@6385240493dfcaf22ab7": {
+      "artifactName": "react_codegen_rnclipboard",
+      "abi": "x86_64",
+      "runtimeFiles": []
+    },
     "react_codegen_safeareacontext::@7984cd80db47aa7b952a": {
       "artifactName": "react_codegen_safeareacontext",
       "abi": "x86_64",
