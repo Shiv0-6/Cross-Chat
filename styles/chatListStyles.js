@@ -109,6 +109,33 @@ const chatListStyles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "700",
   },
+  menuBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+  },
+  menuDropdown: {
+    position: "absolute",
+    top: 8,
+    right: 10,
+    width: 190,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    paddingVertical: 6,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 8,
+    zIndex: 11,
+  },
+  menuItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+  },
+  menuItemText: {
+    color: "#111111",
+    fontSize: 14,
+  },
 
   /* ── Section headers (WhatsApp-style ALL-CAPS grey label) ── */
   sectionHeader: {

@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   TextInput,
   Alert,
   SafeAreaView,
@@ -350,29 +351,67 @@ export default function ChatListScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        {showSettingsPanel && (
+          <>
+            <Pressable
+              style={styles.menuBackdrop}
+              onPress={() => setShowSettingsPanel(false)}
+            />
+            <View style={styles.menuDropdown}>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  setShowComposer(true);
+                  setShowSettingsPanel(false);
+                }}
+              >
+                <Text style={styles.menuItemText}>New chat</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  setShowConnectionPanel(true);
+                  setShowSettingsPanel(false);
+                }}
+              >
+                <Text style={styles.menuItemText}>Connection</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  openSettings();
+                  setShowSettingsPanel(false);
+                }}
+              >
+                <Text style={styles.menuItemText}>Settings</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  resetDraftFields();
+                  setShowSettingsPanel(false);
+                }}
+              >
+                <Text style={styles.menuItemText}>Clear drafts</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  openMoreFeatures();
+                  setShowSettingsPanel(false);
+                }}
+              >
+                <Text style={styles.menuItemText}>More features</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {showSettingsPanel && (
-            <View style={styles.settingsPanel}>
-              <Text style={styles.settingsPanelTitle}>More options</Text>
-              <Text style={styles.settingsPanelSubtitle}>
-                Settings and extra features.
-              </Text>
-              <TouchableOpacity style={styles.settingsActionButton} onPress={openSettings}>
-                <Text style={styles.settingsActionText}>Settings</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.settingsActionButton} onPress={resetDraftFields}>
-                <Text style={styles.settingsActionText}>Clear draft fields</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.settingsActionButton} onPress={openMoreFeatures}>
-                <Text style={styles.settingsActionText}>More features</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
           {showConnectionPanel && (
             <View style={styles.connectionPanel}>
               <Text style={styles.label}>Connection mode</Text>
