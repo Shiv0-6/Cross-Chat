@@ -44,6 +44,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+  include("/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rnasyncstorage_autolinked_build/cmake_install.cmake")
   include("/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rnclipboard_autolinked_build/cmake_install.cmake")
   include("/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/RNCNetInfoSpec_autolinked_build/cmake_install.cmake")
   include("/home/mrfailure/CODING/Cross-Chat/android/app/.cxx/Debug/5e1p1t4z/x86_64/rngesturehandler_codegen_autolinked_build/cmake_install.cmake")
