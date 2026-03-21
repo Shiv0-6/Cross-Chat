@@ -1,6 +1,8 @@
 # Cross-Chat
 
 React Native chat app with Firebase, connect codes, and WhatsApp-style UI.
+![App_overview](images/result.png)
+
 
 ## Features
 
