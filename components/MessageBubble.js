@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text } from "react-native";
-import styles from "../styles/messageBubbleStyles";
+import { useTheme } from "../context/ThemeContext";
+import createMessageBubbleStyles from "../styles/messageBubbleStyles";
 
 function formatTime(createdAt) {
   if (!createdAt) return "";
@@ -29,6 +30,8 @@ export default function MessageBubble({
   isOwn = false,
   tickStatus = "",
 }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createMessageBubbleStyles(colors), [colors]);
   const timeText = formatTime(createdAt);
 
   const tickText =

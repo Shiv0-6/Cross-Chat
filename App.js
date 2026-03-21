@@ -1,34 +1,41 @@
-import React from "react";
+import React, { useContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import ChatListScreen from "./screens/ChatListScreen";
 import ChatScreen from "./screens/ChatScreen";
+import { ThemeProvider, ThemeContext } from "./context/ThemeContext";
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+function AppContent() {
+  const { colors, isDark } = useContext(ThemeContext);
+
   return (
     <NavigationContainer
       theme={{
-        dark: false,
+        dark: isDark,
         colors: {
-          primary: "#25D366",
-          background: "#FFFFFF",
-          card: "#075E54",
-          text: "#FFFFFF",
-          border: "#E9EDEF",
-          notification: "#25D366",
+          primary: colors.primaryGreen,
+          background: colors.backgroundColor,
+          card: colors.headerBackground,
+          text: colors.headerText,
+          border: colors.borderColor,
+          notification: colors.primaryGreen,
         },
       }}
     >
       <Stack.Navigator
         screenOptions={{
-          headerStyle: { backgroundColor: "#075E54" },
-          headerTitleStyle: { color: "#FFFFFF", fontWeight: "700", fontSize: 20 },
+          headerStyle: { backgroundColor: colors.headerBackground },
+          headerTitleStyle: {
+            color: colors.headerText,
+            fontWeight: "700",
+            fontSize: 20,
+          },
           headerShadowVisible: false,
-          headerTintColor: "#FFFFFF",
-          contentStyle: { backgroundColor: "#FFFFFF" },
+          headerTintColor: colors.headerText,
+          contentStyle: { backgroundColor: colors.backgroundColor },
         }}
       >
         <Stack.Screen
@@ -45,5 +52,13 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

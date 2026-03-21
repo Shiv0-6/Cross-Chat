@@ -26,14 +26,17 @@ import {
 } from "firebase/firestore";
 
 import MessageBubble from "../components/MessageBubble";
+import { useTheme } from "../context/ThemeContext";
 import { humanizeConnectionType } from "../utils/chatUtils";
 import {
   DEFAULT_CONNECTION_TYPE,
   FIRESTORE_COLLECTIONS,
 } from "../constants/appConstants";
-import styles from "../styles/chatScreenStyles";
+import createChatScreenStyles from "../styles/chatScreenStyles";
 
 export default function ChatScreen({ route, navigation }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createChatScreenStyles(colors), [colors]);
   const currentUserId = route?.params?.currentUserId || "demo-user";
   const currentUserName = route?.params?.currentUserName || "You";
   const chatId =

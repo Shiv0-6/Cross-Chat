@@ -14,6 +14,7 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { db } from "../services/firebaseConfig";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 
+import { useTheme } from "../context/ThemeContext";
 import {
   normalizeUserId,
   parseParticipants,
@@ -33,9 +34,11 @@ import {
   DEFAULT_CONNECTION_TYPE,
   FIRESTORE_COLLECTIONS,
 } from "../constants/appConstants";
-import styles from "../styles/chatListStyles";
+import createChatListStyles from "../styles/chatListStyles";
 
 export default function ChatListScreen({ navigation }) {
+  const { colors, isDark, toggleTheme } = useTheme();
+  const styles = useMemo(() => createChatListStyles(colors), [colors]);
   const [myName, setMyName] = useState("");
   const [participantsInput, setParticipantsInput] = useState("");
   const [chatTitle, setChatTitle] = useState("");
@@ -384,6 +387,17 @@ export default function ChatListScreen({ navigation }) {
                 }}
               >
                 <Text style={styles.menuItemText}>Settings</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  toggleTheme();
+                  setShowSettingsPanel(false);
+                }}
+              >
+                <Text style={styles.menuItemText}>
+                  {isDark ? "☀️ Light Mode" : "🌙 Dark Mode"}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.menuItem}
