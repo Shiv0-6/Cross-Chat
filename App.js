@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import ChatListScreen from "./screens/ChatListScreen";
 import ChatScreen from "./screens/ChatScreen";
+import SettingsScreen from "./screens/SettingsScreen";
 import { ThemeProvider, ThemeContext } from "./context/ThemeContext";
 
 const Stack = createNativeStackNavigator();
@@ -49,6 +50,11 @@ function AppContent() {
           name="Chat"
           component={ChatScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{ title: "Settings" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

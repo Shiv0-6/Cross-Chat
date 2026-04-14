@@ -66,10 +66,6 @@ export default function ChatListScreen({ navigation }) {
     Alert.alert("Reset", "Draft chat fields were cleared.");
   };
 
-  const openSettings = () => {
-    Alert.alert("Settings", "More settings features can be added here.");
-  };
-
   const openMoreFeatures = () => {
     Alert.alert("More features", "You can add more options in this 3-dots menu panel.");
   };
@@ -382,7 +378,7 @@ export default function ChatListScreen({ navigation }) {
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => {
-                  openSettings();
+                  navigation.navigate("Settings");
                   setShowSettingsPanel(false);
                 }}
               >

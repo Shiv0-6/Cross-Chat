@@ -1,5 +1,6 @@
 {
   "buildFiles": [
+    "/home/mrfailure/CODING/Cross-Chat/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/mrfailure/CODING/Cross-Chat/node_modules/@react-native-clipboard/clipboard/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/mrfailure/CODING/Cross-Chat/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt",
     "/home/mrfailure/CODING/Cross-Chat/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt",
@@ -39,6 +40,11 @@
       "toolchain": "toolchain",
       "abi": "x86",
       "artifactName": "react_codegen_RNCNetInfoSpec"
+    },
+    "react_codegen_rnasyncstorage::@1596841e19ec5b9eeffe": {
+      "toolchain": "toolchain",
+      "abi": "x86",
+      "artifactName": "react_codegen_rnasyncstorage"
     },
     "react_codegen_rnclipboard::@6385240493dfcaf22ab7": {
       "toolchain": "toolchain",
